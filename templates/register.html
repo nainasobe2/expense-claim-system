@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - Smart Expense Claim Approval System{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-badge">PS-068 &bull; Hackathon</div>
+            <h2>Create your account</h2>
+            <p class="auth-subtitle">Register as an employee to submit and track expense claims</p>
+        </div>
+
+        <div id="authAlert" class="alert alert-error" style="display: none;"></div>
+
+        <form id="registerForm" class="auth-form" onsubmit="handleRegisterSubmit(event)">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" class="form-control" placeholder="Your full name" required maxlength="100" autocomplete="name">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Work Email</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="name@company.com" required maxlength="120" autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="department">Department</label>
+                <input type="text" id="department" name="department" class="form-control" placeholder="e.g. Engineering" list="departmentList" required maxlength="100">
+                <datalist id="departmentList">
+                    <option value="Engineering">
+                    <option value="Finance">
+                    <option value="Sales">
+                    <option value="Marketing">
+                    <option value="HR">
+                    <option value="Operations">
+                </datalist>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="At least 8 characters" required minlength="8" autocomplete="new-password">
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Re-enter your password" required autocomplete="new-password">
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn btn-primary btn-block">
+                <span>Create Account</span>
+            </button>
+        </form>
+
+        <p style="text-align: center; margin-top: 16px; font-size: 14px;">
+            Already have an account? <a href="/login" style="font-weight: 600;">Sign in</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/auth.js"></script>
+<script src="/static/js/register.js"></script>
+{% endblock %}
