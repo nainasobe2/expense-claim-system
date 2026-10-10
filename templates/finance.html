@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Finance & Admin - Smart Expense System{% endblock %}
+{% block nav_finance %}active{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="welcome-box">
+        <span class="portal-tag tag-finance">Finance & Administration Portal</span>
+        <h2>Finance Control Center & Spend Analytics</h2>
+        <p class="subtitle">Company-wide expense auditing, disbursement sign-off, and policy rules configuration.</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" onclick="loadFinanceOverview()">
+            <span>🔄 Refresh Data</span>
+        </button>
+    </div>
+</div>
+
+<!-- Stats Metric Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon icon-blue">🏢</div>
+        <div class="stat-content">
+            <span class="stat-label">Total Approved Spend</span>
+            <h3 class="stat-value" id="statCompanySpend">$0.00</h3>
+            <span class="stat-sub">Disbursed company-wide</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-amber">💳</div>
+        <div class="stat-content">
+            <span class="stat-label">Awaiting Disbursement</span>
+            <h3 class="stat-value" id="statPendingDisbursement">0 ($0.00)</h3>
+            <span class="stat-sub">Manager-approved claims</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-rose">🚩</div>
+        <div class="stat-content">
+            <span class="stat-label">Flagged Claims</span>
+            <h3 class="stat-value" id="statHighRiskClaims">0</h3>
+            <span class="stat-sub" id="statFlagRate">0% of total</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-green">⚡</div>
+        <div class="stat-content">
+            <span class="stat-label">Escalation Policy</span>
+            <h3 class="stat-value">&gt; $250.00</h3>
+            <span class="stat-sub">Requires Finance approval</span>
+        </div>
+    </div>
+</div>
+
+<!-- Spend Breakdown by Category Section -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h3>📊 Spend Analytics by Category</h3>
+        <span class="badge badge-info">Real-time Totals</span>
+    </div>
+    <div class="card-body">
+        <div id="categorySpendContainer" class="category-analytics-grid">
+            <p class="text-muted">Loading category totals...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Company Claims Master Log with Filters -->
+<div class="card">
+    <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
+        <h3>📑 Organization Claims Master Log</h3>
+        
+        <!-- Filter Controls -->
+        <div class="filter-controls-row">
+            <div class="filter-item">
+                <label for="filterStatus">Status:</label>
+                <select id="filterStatus" class="form-control form-control-sm" onchange="loadFinanceOverview()">
+                    <option value="ALL">All Statuses</option>
+                    <option value="PENDING_FINANCE">Pending Finance (Awaiting Disbursement)</option>
+                    <option value="PENDING_MANAGER">Pending Manager</option>
+                    <option value="APPROVED">Approved</option>
+                    <option value="REJECTED">Rejected</option>
+                </select>
+            </div>
+
+            <div class="filter-item">
+                <label for="filterCategory">Category:</label>
+                <select id="filterCategory" class="form-control form-control-sm" onchange="loadFinanceOverview()">
+                    <option value="ALL">All Categories</option>
+                    <option value="TRAVEL">Travel</option>
+                    <option value="MEALS">Meals</option>
+                    <option value="EQUIPMENT">Equipment</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </div>
+
+            <div class="filter-item">
+                <label for="filterFlagged">Flags:</label>
+                <select id="filterFlagged" class="form-control form-control-sm" onchange="loadFinanceOverview()">
+                    <option value="ALL">All Claims</option>
+                    <option value="FLAGGED_ONLY">Flagged Only</option>
+                    <option value="CLEAN_ONLY">Clean Only</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="card-body no-padding">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Employee</th>
+                        <th>Dept</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Expense Date</th>
+                        <th>Status</th>
+                        <th>Flags</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="financeClaimsTableBody">
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">
+                            Loading company claims...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/finance.js"></script>
+{% endblock %}

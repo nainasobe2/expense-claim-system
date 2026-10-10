@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Employee Portal - Smart Expense System{% endblock %}
+{% block nav_employee %}active{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="welcome-box">
+        <span class="portal-tag tag-employee">Employee Portal</span>
+        <h2>Welcome back, {{ current_user.name }}</h2>
+        <p class="subtitle">Submit expense claims for reimbursement and monitor approval status in real-time.</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" onclick="scrollToSubmission()">
+            <span>+ Submit New Claim</span>
+        </button>
+    </div>
+</div>
+
+<!-- Stats Metric Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon icon-blue">📋</div>
+        <div class="stat-content">
+            <span class="stat-label">Total Claims</span>
+            <h3 class="stat-value" id="statTotalClaims">0</h3>
+            <span class="stat-sub">Lifetime submissions</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-amber">⏳</div>
+        <div class="stat-content">
+            <span class="stat-label">Pending Approval</span>
+            <h3 class="stat-value" id="statPendingClaims">0</h3>
+            <span class="stat-sub">Under manager/finance review</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-green">✅</div>
+        <div class="stat-content">
+            <span class="stat-label">Approved & Paid</span>
+            <h3 class="stat-value" id="statApprovedAmount">$0.00</h3>
+            <span class="stat-sub">Total reimbursed</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-rose">⚠️</div>
+        <div class="stat-content">
+            <span class="stat-label">Policy Flagged</span>
+            <h3 class="stat-value" id="statFlaggedClaims">0</h3>
+            <span class="stat-sub">With policy violations</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main Section: Submission Form & Recent Claims -->
+<div class="dashboard-main-grid">
+    <!-- Claim Submission Form Card -->
+    <div class="card" id="submissionCard">
+        <div class="card-header">
+            <h3>📝 New Expense Claim</h3>
+            <span class="badge badge-info">Real-time Policy Checking</span>
+        </div>
+        <div class="card-body">
+            <div id="submissionAlert" class="alert" style="display: none;"></div>
+
+            <!-- OCR Auto-fill & Review Banner -->
+            <div id="ocrStatusBox" class="ocr-status-box" style="display: none;">
+                <div class="ocr-header">
+                    <span class="ocr-title">✨ Tesseract OCR Auto-fill</span>
+                    <span id="ocrConfidenceBadge" class="badge"></span>
+                </div>
+                <p id="ocrStatusMessage" class="ocr-message"></p>
+                <div id="ocrExtractedDetails" class="ocr-extracted-preview" style="display: none;">
+                    <div class="ocr-preview-item">Amount: <strong id="ocrPreviewAmount">-</strong></div>
+                    <div class="ocr-preview-item">Date: <strong id="ocrPreviewDate">-</strong></div>
+                    <div class="ocr-preview-item">Category: <strong id="ocrPreviewCategory">-</strong></div>
+                </div>
+            </div>
+
+            <form id="claimForm" onsubmit="handleClaimSubmit(event)" enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="category">Expense Category *</label>
+                        <select id="category" name="category" class="form-control" required onchange="onCategoryChanged()">
+                            <option value="" disabled selected>Loading categories...</option>
+                        </select>
+                        <small id="categoryHint" class="form-hint">Category policy limits will appear here</small>
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label for="amount">Amount ($ USD) *</label>
+                        <input 
+                            type="number" 
+                            id="amount" 
+                            name="amount" 
+                            class="form-control" 
+                            placeholder="0.00" 
+                            step="0.01" 
+                            min="0.01" 
+                            required
+                            oninput="onAmountChanged()"
+                        >
+                        <small id="amountHint" class="form-hint">Must comply with policy cap</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="expense_date">Date of Expense *</label>
+                        <input 
+                            type="date" 
+                            id="expense_date" 
+                            name="expense_date" 
+                            class="form-control" 
+                            required
+                            onchange="onDateChanged()"
+                        >
+                        <small id="dateHint" class="form-hint">Cannot be in the future or exceed max age</small>
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label for="receipt">Receipt File (Optional / Required by policy)</label>
+                        <input 
+                            type="file" 
+                            id="receipt" 
+                            name="receipt" 
+                            class="form-control file-input" 
+                            accept=".png,.jpg,.jpeg,.pdf,.webp"
+                            onchange="onReceiptChanged()"
+                        >
+                        <small class="form-hint">PNG, JPG, PDF up to 16MB</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Business Purpose & Details *</label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        rows="3" 
+                        class="form-control" 
+                        placeholder="Explain the business context (e.g. Travel to client site for quarterly review...)" 
+                        required
+                    ></textarea>
+                </div>
+
+                <!-- Instant Policy Feedback Banner -->
+                <div id="realtimePolicyBox" class="policy-feedback-box" style="display: none;">
+                    <div class="policy-box-title">⚡ Instant Policy Check</div>
+                    <ul id="policyCheckList" class="policy-check-list"></ul>
+                </div>
+
+                <div class="form-actions">
+                    <button type="reset" class="btn btn-outline" onclick="resetPolicyCheck()">Reset</button>
+                    <button type="submit" id="submitClaimBtn" class="btn btn-primary">
+                        <span>Submit Claim</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Active & Historical Claims Table Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3>📂 My Expense Claims</h3>
+            <button class="btn btn-sm btn-outline" onclick="loadMyClaims()">🔄 Refresh</button>
+        </div>
+        <div class="card-body no-padding">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Policy Flags</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myClaimsTableBody">
+                        <tr>
+                            <td colspan="7" class="text-center py-4">Loading your claims...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/employee.js"></script>
+<script>
+function scrollToSubmission() {
+    document.getElementById("submissionCard").scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+{% endblock %}

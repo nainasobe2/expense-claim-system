@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Expense Claim Approval System{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="/" class="brand-link">
+                    <span class="brand-icon">⚡</span>
+                    <span class="brand-name">SmartExpense</span>
+                </a>
+                <span class="hackathon-tag">PS-068 &bull; The Semicolons</span>
+            </div>
+
+            {% if current_user %}
+            <nav class="nav-links">
+                {% if current_user.role in ['EMPLOYEE', 'FINANCE_ADMIN'] %}
+                <a href="/employee" class="nav-item {% block nav_employee %}{% endblock %}">
+                    <span>📝 Submit & Claims</span>
+                </a>
+                {% endif %}
+
+                {% if current_user.role in ['MANAGER', 'FINANCE_ADMIN'] %}
+                <a href="/approver" class="nav-item {% block nav_approver %}{% endblock %}">
+                    <span>🛡️ Manager Review</span>
+                </a>
+                {% endif %}
+
+                {% if current_user.role == 'FINANCE_ADMIN' %}
+                <a href="/finance" class="nav-item {% block nav_finance %}{% endblock %}">
+                    <span>📊 Finance & Admin</span>
+                </a>
+                {% endif %}
+            </nav>
+
+            <div class="nav-user">
+                <div class="user-details">
+                    <span class="user-name">{{ current_user.name }}</span>
+                    <div class="user-meta">
+                        <span class="user-dept">{{ current_user.department }}</span>
+                        <span class="role-badge role-{{ current_user.role.lower() }}">
+                            {{ current_user.role | replace('_', ' ') }}
+                        </span>
+                    </div>
+                </div>
+                <a href="/logout" class="btn btn-outline btn-sm logout-btn">
+                    <span>Sign Out</span>
+                </a>
+            </div>
+            {% else %}
+            <div class="nav-actions">
+                <a href="/login" class="btn btn-primary btn-sm">Sign In</a>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="page-container">
+        <!-- Toast Notification Container -->
+        <div id="toastContainer" class="toast-container"></div>
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 Smart Expense Claim Approval System &bull; Team <strong>The Semicolons</strong></p>
+            <div class="footer-links">
+                <span class="api-status" id="apiStatusBadge">● Connecting...</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Manager Review - Smart Expense System{% endblock %}
+{% block nav_approver %}active{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="welcome-box">
+        <span class="portal-tag tag-manager">Approver & Manager Portal</span>
+        <h2>Manager Review Dashboard</h2>
+        <p class="subtitle">Review, validate, and approve submitted claims for your department ({{ current_user.department }}).</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" onclick="loadApprovalQueue()">
+            <span>🔄 Refresh Queue</span>
+        </button>
+    </div>
+</div>
+
+<!-- Stats Metric Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon icon-amber">📬</div>
+        <div class="stat-content">
+            <span class="stat-label">Pending Approval</span>
+            <h3 class="stat-value" id="statPendingReview">0</h3>
+            <span class="stat-sub">Claims awaiting your decision</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-rose">⚠️</div>
+        <div class="stat-content">
+            <span class="stat-label">Flagged / Duplicates</span>
+            <h3 class="stat-value" id="statFlaggedReview">0</h3>
+            <span class="stat-sub">Require scrutiny</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-blue">💰</div>
+        <div class="stat-content">
+            <span class="stat-label">Total Queue Value</span>
+            <h3 class="stat-value" id="statQueueValue">$0.00</h3>
+            <span class="stat-sub">Pending expenditure</span>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-purple">⚡</div>
+        <div class="stat-content">
+            <span class="stat-label">Escalation Threshold</span>
+            <h3 class="stat-value">$250.00</h3>
+            <span class="stat-sub">High-value or flagged -> Finance</span>
+        </div>
+    </div>
+</div>
+
+<!-- Approval Review Queue Table -->
+<div class="card">
+    <div class="card-header">
+        <h3>📋 Claims Requiring Review</h3>
+        <div class="table-filters">
+            <span class="badge badge-warning">Department: {{ current_user.department }}</span>
+        </div>
+    </div>
+    <div class="card-body no-padding">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Claim ID</th>
+                        <th>Employee</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Policy / Duplicate Flags</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="approverTableBody">
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            Loading pending claims...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/approver.js"></script>
+{% endblock %}
